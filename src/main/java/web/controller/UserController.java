@@ -2,68 +2,78 @@ package web.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import web.model.User;
-import web.service.UserService;
+import org.springframework.web.bind.annotation.*;
+import web.model.*;
+import web.service.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @Controller
 public class UserController {
 
-    private final UserService userService;
+    private UserService userService;
 
     @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
+    public UserController(UserService userServiceImp) {
+        this.userService = userServiceImp;
     }
 
-    @GetMapping (value = "/")
-    public String showAllUsers(ModelMap modelMap) {
-        List<User> allUsers = userService.getAllUsers();
-        modelMap.addAttribute("allUsers", allUsers);
+    @GetMapping("/")
+    public String helloPage() {
+        return "redirect:/users";
+    }
+
+    @GetMapping(value = "users")
+    public String showAllUsers(ModelMap model) {
+        model.addAttribute("users", userService.getAllUsers());
         return "users";
     }
 
-    @PostMapping("/addUser")
-    public String addNewUser(
-            @Valid @ModelAttribute("user") User user,
-            BindingResult bindingResult,
-            RedirectAttributes redirectAttributes) {
+    @GetMapping(value = "users/add")
+    public String showPageFormNewUser(Model model) {
+        User user = new User();
+        model.addAttribute("user", user);
+        return "addUser";
+    }
 
+    @PostMapping(value = "users/add")
+    public String createNewUser(@ModelAttribute("user") @Valid User user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return "redirect:/";
+            return "addUser";
         }
-
-        userService.saveUser(user);
-        redirectAttributes.addFlashAttribute("successMessage", "Пользователь успешно добавлен!");
+        userService.addUser(user);
         return "redirect:/";
     }
 
-    @PostMapping(value = "/updateUser")
-    public String updateUser(
-            @Valid @ModelAttribute("user") User user,
-            BindingResult bindingResult,
-            RedirectAttributes redirectAttributes) {
-
-        if (bindingResult.hasErrors()) {
-            return "redirect:/";
-        }
-        user.setId(user.getId());
-        userService.updateUser(user);
-        return "redirect:/";
+    @GetMapping(value = "users/edit/{id}")
+    public String editUser(ModelMap model, @PathVariable("id") Long id) {
+        User user = userService.getUserById(id);
+        model.addAttribute("user", user);
+        return "editUser";
     }
 
-    @PostMapping(value = "/deleteUser")
-    public String deleteUser(@RequestParam long id) {
+    @PostMapping(value = "users/edit")
+    public String updateUser(@ModelAttribute("user") @Valid User user, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "editUser";
+        }
+        userService.editUser(user);
+        return "redirect:/users";
+    }
+
+    @DeleteMapping("users/delete")
+    public String deleteUserById(@RequestParam("id") Long id) {
         userService.deleteUser(id);
-        return "redirect:/";
+        return "redirect:/users";
     }
+
+    @GetMapping("users/{id}")
+    public String showUserPage(@PathVariable("id") Long id, ModelMap modelMap) {
+        modelMap.addAttribute("user", userService.getUserById(id));
+        return "show";
+    }
+
 }

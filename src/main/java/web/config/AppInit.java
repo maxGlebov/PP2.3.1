@@ -17,7 +17,6 @@ public class AppInit extends AbstractAnnotationConfigDispatcherServletInitialize
         return null;
     }
 
-
     @Override
     protected Class<?>[] getServletConfigClasses() {
         return new Class<?>[]{
@@ -33,14 +32,15 @@ public class AppInit extends AbstractAnnotationConfigDispatcherServletInitialize
     @Override
     public void onStartup(ServletContext aServletContext) throws ServletException {
         super.onStartup(aServletContext);
-        registerCharacterEncodingFilter(aServletContext);
-        registerHiddenFieldFilter(aServletContext);
+        registerHiddenFieldFilter(aServletContext); // HiddenHttpMethodFilter первым
+        registerCharacterEncodingFilter(aServletContext); // CharacterEncodingFilter вторым
     }
 
     private void registerHiddenFieldFilter(ServletContext aContext) {
         aContext.addFilter("hiddenHttpMethodFilter",
-                new HiddenHttpMethodFilter()).addMappingForUrlPatterns(null ,true, "/*");
+                new HiddenHttpMethodFilter()).addMappingForUrlPatterns(null, true, "/*");
     }
+
     private void registerCharacterEncodingFilter(ServletContext aContext) {
         EnumSet<DispatcherType> dispatcherTypes = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD);
         CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
@@ -49,5 +49,4 @@ public class AppInit extends AbstractAnnotationConfigDispatcherServletInitialize
         FilterRegistration.Dynamic characterEncoding = aContext.addFilter("characterEncoding", characterEncodingFilter);
         characterEncoding.addMappingForUrlPatterns(dispatcherTypes, true, "/*");
     }
-
 }

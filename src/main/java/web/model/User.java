@@ -1,9 +1,7 @@
 package web.model;
 
-
 import javax.persistence.*;
 import javax.validation.constraints.*;
-import java.util.Objects;
 
 @Entity
 @Table(name = "users")
@@ -11,70 +9,65 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @Column(nullable = false)
+    private Long id;
 
-
-
-
-    @Pattern(regexp = "^[a-zA-Zа-яА-Я]+$", message = "Имя должно содержать только буквы")
+    @Column(name = "name")
+    @NotEmpty(message = "Поле 'Имя' не может быть пустым")
+    @Size(min = 2, max = 20, message = "Поле 'Имя' должно быть от 2 до 20 символов")
     private String name;
 
-    @Pattern(regexp = "^[a-zA-Zа-яА-Я]+$", message = "Фамилия должна содержать только буквы")
-    private String surname;
+    @Column(name = "lastName")
+    @NotEmpty(message = "Поле 'Фамилия' не может быть пустым")
+    @Size(min = 2, max = 20, message = "Поле 'Фамилия' должно быть от 2 до 20 символов")
+    private String lastName;
 
-    @Min(value = 0, message = "Возраст должен быть больше 0")
-    private int age;
+    @Column(name = "email", unique = true)
+    @NotEmpty(message = "Поле 'Имя' не может быть пустым")
+    @Email(message = "некорректный email")
+    private String email;
 
-    public User() {}
-
-    public User(String name, String surname, int age ) {
-        this.name = name;
-        this.surname = surname;
-        this.age = age;
+    public User() {
     }
 
-    public long getId() {
+    public User(String name, String lastName, String email) {
+        this.name = name;
+        this.lastName = lastName;
+        this.email = email;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    public Long getId() {
         return id;
     }
-
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
-
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
-
-    public String getSurname() {
-        return surname;
+    public String getLastName() {
+        return lastName;
     }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return id == user.id && age == user.age && Objects.equals(name, user.name) && Objects.equals(surname, user.surname);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, surname, age);
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                '}';
     }
 }
